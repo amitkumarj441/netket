@@ -24,6 +24,23 @@ namespace netket {
 
 RbmSpin::RbmSpin(std::shared_ptr<const AbstractHilbert> hilbert, Index nhidden,
                  Index alpha, bool usea, bool useb)
+/* Variables are:
+ * hilbert - the variable containing information about physical system
+ * nhidden - number of neurons in hidden layer defined by larger of the values
+ *           (alpha * number of neuron from visible layer) or nhidden
+ * alpha - density defined as (number of neurons in hidden layer / number of
+ *         neurons in visible layer)
+ * usea - if true use biases in visible layer a*output
+ * useb - if true use biases in hidden layer b*output
+ */ 
+        
+/* Defining variational parameters: weights and biases (a_ for 
+ * visible layer, b_ for hidden layer)
+ *
+ * theta_ correspond to the "output" of a hidden layer 
+ * theta = W_.transpose() * visible + b_. It is used as the input of cosh
+ * functions in the expression for a wavefunction. 
+ */
     : AbstractMachine{std::move(hilbert)},
       W_{},
       a_{nonstd::nullopt},
@@ -46,20 +63,6 @@ RbmSpin::RbmSpin(std::shared_ptr<const AbstractHilbert> hilbert, Index nhidden,
                      << nhidden << " != " << alpha << " * " << nvisible);
   }
   nhidden = std::max(nhidden, alpha * nvisible);
-  /* Initialization of the instance of RbmSpin class (defined in 
-   * header) Variables are:
-   * hilbert - the variable containing information about physical system
-   * nhidden - number of neurons in hidden layer defined by larger of the values
-   *           (alpha * number of neuron from visible layer) or nhidden
-   * alpha - density defined as (number of neurons in hidden layer / number of
-   *         neurons in visible layer)
-   * usea - if true use biases in visible layer a*output
-   * useb - if true use biases in hidden layer b*output
-   */ 
-        
-  /* Defining variational parameters: weights and biases (a_ for 
-   * visible layer, b_ for hidden layer)
-   */
   W_.resize(nvisible, nhidden); 
   if (usea) {
     a_.emplace(nvisible);
@@ -67,10 +70,7 @@ RbmSpin::RbmSpin(std::shared_ptr<const AbstractHilbert> hilbert, Index nhidden,
   if (useb) {
     b_.emplace(nhidden);
   }
-  /* theta_ correspond to the "output" of a hidden layer 
-   * theta = W_.transpose() * visible + b_. It is used as the input of cosh
-   * functions in the expression for a wavefunction.
-   */ 
+        
   theta_.resize(1, nhidden);
 }
 
